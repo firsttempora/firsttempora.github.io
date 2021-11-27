@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="./main.css">
+  <title>DnD distance calculator</title>
+</head>
+<body>
+<h1>DnD distance calculator</h1>
+<h2>Straight line movement</h2>
+
+<form onsubmit="calcLinearDistance(); return false;">
+    <input type="number" id="move-speed-input" name="move-speed-input" value="25" />
+    <label for="move-speed-input">Move speed (ft/turn)</label><br>
+    <input type="number" id="move-overshoot-input" name="move-overshoot-input" value="0" />
+    <label for="move-overshoot-input">Allowed overshoot (ft/turn)</label><br>
+    <input type="checkbox" id="move-speed-all-checkbox" name="move-speed-all-checkbox" checked/>
+    <label for="move-speed-all-checkbox">Show redundant combinations</label><br>
+    <input type="checkbox" id="move-speed-sub-checkbox" name="move-speed-sub-checkbox"/>
+    <label for="move-speed-sub-checkbox">Show incomplete moves</label><br>
+    <input type="submit" value="Update"></input>
+</form>
+
+<table id=grid-move-table class="pretty-table">
+
+</table>
+
+<script>
+    const ft_per_cell = 5;
+    const move_input = document.getElementById("move-speed-input");
+    const move_overshoot = document.getElementById("move-overshoot-input");
+    const move_table = document.getElementById("grid-move-table");
+    const move_redudant_checkbox = document.getElementById("move-speed-all-checkbox");
+    const move_incomplete_checkbox = document.getElementById("move-speed-sub-checkbox");
+    
+    function calcLinearDistance() {
+        const move_speed = move_input.value;
+        const ncells = move_speed / ft_per_cell;
+        const allowed_overshoot = move_overshoot.value / ft_per_cell;
+
+        resetMoveTable();
+        var ll = -1;
+        if (!move_redudant_checkbox.checked) {
+            ll = Math.floor(ncells / 2);
+        }
+        var x = ncells;
+        while (x > ll){
+            const moves = calcAllowableMoves(x, ncells, !move_incomplete_checkbox.checked);
+            
+            for (i in moves) {
+                const y = moves[i][0];
+                const tot = moves[i][1];
+                addMoveTableRow(x, y, tot*ft_per_cell, tot <= (ncells + allowed_overshoot));
+            }
+            x -= 1;
+        }
+    }
+
+    function calcAllowableMoves(x, total, full_only) {
+        var moves = [[0, x]];
+        var dist = x;
+        var y = 0;
+        while (dist < total) {
+            y += 1;
+            dist = Math.sqrt(x*x + y*y);
+            moves.push([y, dist]);
+        }
+
+        console.log("full_only = ", full_only);
+        if (full_only) {
+            // Is the last element exactly the distance we need? If so, just return that.
+            // Otherwise, return the last two.
+            if (Math.abs(dist - total) < 0.01) {
+                return moves.slice(-1);
+            }else{
+                return moves.slice(-2);
+            }
+        }else{
+            return moves;
+        }
+    }
+
+    function removeChildren(parent) {
+        while (parent.lastChild) {
+            parent.removeChild(parent.lastChild);
+        }
+    }
+
+    function resetMoveTable() {
+        removeChildren(move_table);
+        var tr = document.createElement("tr");
+        const headers = ["x cells", "y cells", "total dist. (ft)"];
+        for (i in headers) {
+            var th = document.createElement("th");
+            th.appendChild(document.createTextNode(headers[i]));
+            tr.appendChild(th);
+        }
+        move_table.appendChild(tr);
+    }
+
+    function addMoveTableRow(xdist, ydist, totaldist, distless) {
+        var tr = document.createElement("tr");
+        const values = [xdist, ydist, totaldist.toFixed(2)];
+        for (i in values) {
+            var tdx = document.createElement("td");
+            tdx.appendChild(document.createTextNode(values[i]));
+            tr.appendChild(tdx);
+            tr.setAttribute("class", distless ? "dist-under" : "dist-over");
+        }
+        move_table.appendChild(tr);
+    }
+</script>
+
+</body>
+</html>
