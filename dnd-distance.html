@@ -41,8 +41,12 @@
     const move_overshoot = document.getElementById("move-overshoot-input");
     const dashing_checkbox = document.getElementById("dashing-checkbox");
 
+    function getBaseMoveSpeed() {
+        return parseInt(move_input.value);
+    }
+
     function getMoveSpeed() {
-        const move_speed = parseInt(move_input.value);
+        const move_speed = getBaseMoveSpeed();
         const is_dashing = dashing_checkbox.checked;
         return is_dashing ? move_speed * 2 : move_speed;
     }
@@ -53,8 +57,19 @@
 
     function getMaxMove() {
         const tmp = getMoveSpeed() + getOvershoot();
-        console.log(getMoveSpeed(), getOvershoot(), tmp);
+        // console.log(getMoveSpeed(), getOvershoot(), tmp);
         return tmp;
+    }
+
+    function getRowClass(dist) {
+        console.log(dist, getBaseMoveSpeed(), getMaxMove());
+        if (dist <= getBaseMoveSpeed())
+            return "dist-under";
+
+        if (dist > getMaxMove())
+            return "dist-over";
+
+        return "dist-dash";
     }
 </script>
 
@@ -76,10 +91,8 @@
             const dx = document.getElementById(`segment-${i}-x-input`).value;
             const dy = document.getElementById(`segment-${i}-y-input`).value;
             dist += Math.sqrt(dx*dx + dy*dy) * ft_per_cell;
-            const dist_ok = dist <= getMaxMove();
-            console.log(`row ${i}: dist = ${dist}, dist_ok = ${dist_ok}, max = ${getMaxMove()}`)
             document.getElementById(`segment-total-${i}`).innerText = dist.toFixed(2);
-            document.getElementById(`seg-table-row-${i}`).setAttribute("class", dist_ok ? "dist-under" : "dist-over");
+            document.getElementById(`seg-table-row-${i}`).setAttribute("class", getRowClass(dist));
         }
     }
 
@@ -104,6 +117,7 @@
         input.setAttribute("name", `segment-${irow}-${xy}-input`);
         input.setAttribute("type", "number");
         input.setAttribute("value", 0);
+        input.setAttribute("min", 0);
         input.setAttribute("onchange", "updateSegTable()");
         td.appendChild(input);
         return td;
@@ -142,7 +156,6 @@
     function calcLinearDistance() {
         const move_speed = getMoveSpeed();
         const ncells = move_speed / ft_per_cell;
-        const allowed_overshoot = getOvershoot() / ft_per_cell;
 
         resetMoveTable();
         var ll = -1;
@@ -156,7 +169,7 @@
             for (i in moves) {
                 const y = moves[i][0];
                 const tot = moves[i][1];
-                addMoveTableRow(x, y, tot*ft_per_cell, tot <= (ncells + allowed_overshoot));
+                addMoveTableRow(x, y, tot*ft_per_cell);
             }
             x -= 1;
         }
@@ -198,14 +211,14 @@
         move_table.appendChild(tr);
     }
 
-    function addMoveTableRow(xdist, ydist, totaldist, distless) {
+    function addMoveTableRow(xdist, ydist, totaldist) {
         var tr = document.createElement("tr");
         const values = [xdist, ydist, totaldist.toFixed(2)];
         for (i in values) {
             var tdx = document.createElement("td");
             tdx.appendChild(document.createTextNode(values[i]));
             tr.appendChild(tdx);
-            tr.setAttribute("class", distless ? "dist-under" : "dist-over");
+            tr.setAttribute("class", getRowClass(totaldist));
         }
         move_table.appendChild(tr);
     }

@@ -16,6 +16,14 @@ body {
     background-color: #82f53f;
 }
 
+.conditional-table .dist-dash:nth-child(odd) {
+    background-color: #fdff98;
+}
+
+.conditional-table .dist-dash:nth-child(even) {
+    background-color: #f5e93f;
+}
+
 .conditional-table .dist-over:nth-child(odd) {
     background-color: #ff9898;
 }
