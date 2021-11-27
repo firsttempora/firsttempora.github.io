@@ -21,10 +21,47 @@
 
 <body>
 <h1>DnD distance calculator</h1>
+
+<h2>Character properties</h2>
+
+<form onsubmit="return false;">
+    <input type="number" id="move-speed-input" name="move-speed-input" value="25" min=0 step=5
+     onchange="calcLinearDistance(); updateSegTable();"/>
+    <label for="move-speed-input">Move speed (ft/turn)</label><br>
+    <input type="number" id="move-overshoot-input" name="move-overshoot-input" value="0" min=0
+     onchange="calcLinearDistance(); updateSegTable();"/>
+    <label for="move-overshoot-input">Allowed overshoot (ft/turn)</label><br>
+    <input type="checkbox" id="dashing-checkbox" name="dashing-checkbox"
+     onchange="calcLinearDistance(); updateSegTable();"/>
+    <label for="dashing-checkbox">Dashing</label><br>
+</form>
+
+<script>
+    const move_input = document.getElementById("move-speed-input");
+    const move_overshoot = document.getElementById("move-overshoot-input");
+    const dashing_checkbox = document.getElementById("dashing-checkbox");
+
+    function getMoveSpeed() {
+        const move_speed = parseInt(move_input.value);
+        const is_dashing = dashing_checkbox.checked;
+        return is_dashing ? move_speed * 2 : move_speed;
+    }
+
+    function getOvershoot() {
+        return parseInt(move_overshoot.value);
+    }
+
+    function getMaxMove() {
+        const tmp = getMoveSpeed() + getOvershoot();
+        console.log(getMoveSpeed(), getOvershoot(), tmp);
+        return tmp;
+    }
+</script>
+
 <h2>Movement segments</h2>
 
 <form onsubmit="">
-    <table id="seg-move-table">
+    <table id="seg-move-table" class="conditional-table">
         <tr><th>Segment</th><th>x cells</th><th>y cells</th><th>Distance traveled</th></tr>
     </table>
 </form>
@@ -39,7 +76,10 @@
             const dx = document.getElementById(`segment-${i}-x-input`).value;
             const dy = document.getElementById(`segment-${i}-y-input`).value;
             dist += Math.sqrt(dx*dx + dy*dy) * ft_per_cell;
+            const dist_ok = dist <= getMaxMove();
+            console.log(`row ${i}: dist = ${dist}, dist_ok = ${dist_ok}, max = ${getMaxMove()}`)
             document.getElementById(`segment-total-${i}`).innerText = dist.toFixed(2);
+            document.getElementById(`seg-table-row-${i}`).setAttribute("class", dist_ok ? "dist-under" : "dist-over");
         }
     }
 
@@ -47,6 +87,8 @@
         console.log(`Adding ${nrows} rows to segment table`);
         for (var irow = 0; irow < nrows; irow++) {
             var tr = document.createElement("tr");
+            tr.setAttribute("id", `seg-table-row-${irow}`);
+            tr.setAttribute("class", "dist-under");
             tr.appendChild(makeSegTableText("segment-id", irow, irow+1));
             tr.appendChild(makeSegTableInput("x", irow));
             tr.appendChild(makeSegTableInput("y", irow));
@@ -80,15 +122,12 @@
 <h2>Straight line movement</h2>
 
 <form onsubmit="calcLinearDistance(); return false;">
-    <input type="number" id="move-speed-input" name="move-speed-input" value="25" />
-    <label for="move-speed-input">Move speed (ft/turn)</label><br>
-    <input type="number" id="move-overshoot-input" name="move-overshoot-input" value="0" />
-    <label for="move-overshoot-input">Allowed overshoot (ft/turn)</label><br>
-    <input type="checkbox" id="move-speed-all-checkbox" name="move-speed-all-checkbox" checked/>
+    <input type="checkbox" id="move-speed-all-checkbox" name="move-speed-all-checkbox" checked
+    onchange="calcLinearDistance();"/>
     <label for="move-speed-all-checkbox">Show redundant combinations</label><br>
-    <input type="checkbox" id="move-speed-sub-checkbox" name="move-speed-sub-checkbox"/>
+    <input type="checkbox" id="move-speed-sub-checkbox" name="move-speed-sub-checkbox"
+    onchange="calcLinearDistance();"/>
     <label for="move-speed-sub-checkbox">Show incomplete moves</label><br>
-    <input type="submit" value="Update"></input>
 </form>
 
 <table id=grid-move-table class="conditional-table">
@@ -96,16 +135,14 @@
 </table>
 
 <script>
-    const move_input = document.getElementById("move-speed-input");
-    const move_overshoot = document.getElementById("move-overshoot-input");
     const move_table = document.getElementById("grid-move-table");
     const move_redudant_checkbox = document.getElementById("move-speed-all-checkbox");
     const move_incomplete_checkbox = document.getElementById("move-speed-sub-checkbox");
     
     function calcLinearDistance() {
-        const move_speed = move_input.value;
+        const move_speed = getMoveSpeed();
         const ncells = move_speed / ft_per_cell;
-        const allowed_overshoot = move_overshoot.value / ft_per_cell;
+        const allowed_overshoot = getOvershoot() / ft_per_cell;
 
         resetMoveTable();
         var ll = -1;
@@ -172,6 +209,8 @@
         }
         move_table.appendChild(tr);
     }
+
+    calcLinearDistance();
 </script>
 
 </body>
