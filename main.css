@@ -2,44 +2,44 @@ body {
     font-family: 'Enriqueta', arial, serif;
 }
 
-.pretty-table {
+.conditional-table {
     border-collapse: collapse;
     border-top: 10px;
     margin-top: 1rem;
 }
 
-.pretty-table .dist-under:nth-child(odd) {
+.conditional-table .dist-under:nth-child(odd) {
     background-color: #9bff98;
 }
 
-.pretty-table .dist-under:nth-child(even) {
+.conditional-table .dist-under:nth-child(even) {
     background-color: #82f53f;
 }
 
-.pretty-table .dist-over:nth-child(odd) {
+.conditional-table .dist-over:nth-child(odd) {
     background-color: #ff9898;
 }
 
-.pretty-table .dist-over:nth-child(even) {
+.conditional-table .dist-over:nth-child(even) {
     background-color: #ff8585;
 }
 
-.pretty-table td {
+.conditional-table td {
     padding: 10px;
 }
 
-.pretty-table th {
+.conditional-table th {
     background-color: #58f8dd;
     border-top: 2px solid black;
     border-bottom: 2px solid black;
     padding: 10px;
 }
 
-.pretty-table tr:last-child {
+.conditional-table tr:last-child {
     border-bottom: 2px solid black;
 }
 
-.pretty-table .spacer {
+.conditional-table .spacer {
     background-color: #ffffff;
     border-top: 2px solid black;
 }

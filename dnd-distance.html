@@ -6,9 +6,77 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="./main.css">
   <title>DnD distance calculator</title>
+
+  <script>
+      const ft_per_cell = 5;
+
+      function removeChildren(parent) {
+        while (parent.lastChild) {
+            parent.removeChild(parent.lastChild);
+        }
+    }
+  </script>
 </head>
+
+
 <body>
 <h1>DnD distance calculator</h1>
+<h2>Movement segments</h2>
+
+<form onsubmit="">
+    <table id="seg-move-table">
+        <tr><th>Segment</th><th>x cells</th><th>y cells</th><th>Distance traveled</th></tr>
+    </table>
+</form>
+
+<script>
+    const seg_table = document.getElementById("seg-move-table");
+    const n_segments = 5;
+
+    function updateSegTable() {
+        var dist = 0.0;
+        for (var i = 0; i < n_segments; i++) {
+            const dx = document.getElementById(`segment-${i}-x-input`).value;
+            const dy = document.getElementById(`segment-${i}-y-input`).value;
+            dist += Math.sqrt(dx*dx + dy*dy) * ft_per_cell;
+            document.getElementById(`segment-total-${i}`).innerText = dist.toFixed(2);
+        }
+    }
+
+    function setupSegTable(nrows) {
+        console.log(`Adding ${nrows} rows to segment table`);
+        for (var irow = 0; irow < nrows; irow++) {
+            var tr = document.createElement("tr");
+            tr.appendChild(makeSegTableText("segment-id", irow, irow+1));
+            tr.appendChild(makeSegTableInput("x", irow));
+            tr.appendChild(makeSegTableInput("y", irow));
+            tr.appendChild(makeSegTableText("segment-total", irow, "0.00"));
+            seg_table.appendChild(tr);
+        }
+    }
+
+    function makeSegTableInput(xy, irow) {
+        var td = document.createElement("td");
+        var input = document.createElement("input");
+        input.setAttribute("id", `segment-${irow}-${xy}-input`);
+        input.setAttribute("name", `segment-${irow}-${xy}-input`);
+        input.setAttribute("type", "number");
+        input.setAttribute("value", 0);
+        input.setAttribute("onchange", "updateSegTable()");
+        td.appendChild(input);
+        return td;
+    }
+
+    function makeSegTableText(prefix, irow, text) {
+        var td = document.createElement("td");
+        td.setAttribute("id", `${prefix}-${irow}`);
+        td.appendChild(document.createTextNode(text));
+        return td;
+    }
+
+    setupSegTable(n_segments);
+</script>
+
 <h2>Straight line movement</h2>
 
 <form onsubmit="calcLinearDistance(); return false;">
@@ -23,12 +91,11 @@
     <input type="submit" value="Update"></input>
 </form>
 
-<table id=grid-move-table class="pretty-table">
+<table id=grid-move-table class="conditional-table">
 
 </table>
 
 <script>
-    const ft_per_cell = 5;
     const move_input = document.getElementById("move-speed-input");
     const move_overshoot = document.getElementById("move-overshoot-input");
     const move_table = document.getElementById("grid-move-table");
@@ -79,12 +146,6 @@
             }
         }else{
             return moves;
-        }
-    }
-
-    function removeChildren(parent) {
-        while (parent.lastChild) {
-            parent.removeChild(parent.lastChild);
         }
     }
 
