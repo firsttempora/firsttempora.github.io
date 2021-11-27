@@ -51,3 +51,7 @@ body {
     background-color: #ffffff;
     border-top: 2px solid black;
 }
+
+.num-sm {
+    width: 3rem;
+}

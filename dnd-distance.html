@@ -25,10 +25,10 @@
 <h2>Character properties</h2>
 
 <form onsubmit="return false;">
-    <input type="number" id="move-speed-input" name="move-speed-input" value="25" min=0 step=5
+    <input type="number" id="move-speed-input" name="move-speed-input" value="25" min=0 step=5 class="num-sm"
      onchange="calcLinearDistance(); updateSegTable();"/>
     <label for="move-speed-input">Move speed (ft/turn)</label><br>
-    <input type="number" id="move-overshoot-input" name="move-overshoot-input" value="0" min=0
+    <input type="number" id="move-overshoot-input" name="move-overshoot-input" value="0" min=0 class="num-sm"
      onchange="calcLinearDistance(); updateSegTable();"/>
     <label for="move-overshoot-input">Allowed overshoot (ft/turn)</label><br>
     <input type="checkbox" id="dashing-checkbox" name="dashing-checkbox"
@@ -57,12 +57,10 @@
 
     function getMaxMove() {
         const tmp = getMoveSpeed() + getOvershoot();
-        // console.log(getMoveSpeed(), getOvershoot(), tmp);
         return tmp;
     }
 
     function getRowClass(dist) {
-        console.log(dist, getBaseMoveSpeed(), getMaxMove());
         if (dist <= getBaseMoveSpeed())
             return "dist-under";
 
@@ -97,7 +95,6 @@
     }
 
     function setupSegTable(nrows) {
-        console.log(`Adding ${nrows} rows to segment table`);
         for (var irow = 0; irow < nrows; irow++) {
             var tr = document.createElement("tr");
             tr.setAttribute("id", `seg-table-row-${irow}`);
@@ -118,6 +115,7 @@
         input.setAttribute("type", "number");
         input.setAttribute("value", 0);
         input.setAttribute("min", 0);
+        input.setAttribute("class", "num-sm");
         input.setAttribute("onchange", "updateSegTable()");
         td.appendChild(input);
         return td;
@@ -185,7 +183,6 @@
             moves.push([y, dist]);
         }
 
-        console.log("full_only = ", full_only);
         if (full_only) {
             // Is the last element exactly the distance we need? If so, just return that.
             // Otherwise, return the last two.
